@@ -1,6 +1,6 @@
 {
   "name": "Streamlit Template from dev container",
-  "image": "ghcr.io/streamlit/basic-template:latest",
+  "image": "mcr.microsoft.com/devcontainers/python:latest",
   "customizations": {
     "codespaces": {
       "openFiles": [
@@ -9,6 +9,7 @@
       ]
     }
   },
+  "postCreateCommand": "pip3 install -r requirements.txt",
   "postAttachCommand": {
     "server": "streamlit run streamlit_app.py --server.enableCORS false --server.enableXsrfProtection false"
   },
