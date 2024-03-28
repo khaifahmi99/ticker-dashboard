@@ -5,9 +5,9 @@ import pandas as pd
 
 # config
 st.set_page_config(layout="wide")
-st.title('Welcome to Ticker Dashboard Streamlit App')
+st.title('Compare Shares')
 
-with st.expander("Edit Chart"):
+with st.sidebar:
     with st.form("shares_form"):
         st.write("Please insert two companies to compare")
         company_1 = st.text_input('Company 1', 'GOOG')
