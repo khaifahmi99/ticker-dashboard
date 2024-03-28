@@ -36,6 +36,39 @@ bound_percentage = 0.1
 upper_bound = df['Value'].max() + (df['Value'].max() * bound_percentage)
 lower_bound = df['Value'].min() - (df['Value'].min() * bound_percentage)
 
+selected1 = company_1.split(' ')[0]
+selected2 = company_2.split(' ')[0]
+selected_list = [selected1, selected2]
+group1 = df[df['Company'] == selected1]
+group2 = df[df['Company'] == selected2]
+
+group1_diff = group1.iloc[-1]['Value'] - group1.iloc[0]['Value']
+group2_diff = group2.iloc[-1]['Value'] - group2.iloc[0]['Value']
+groups_diff = [group1_diff, group2_diff]
+
+percent1_diff = group1_diff / group1.iloc[-1]['Value']
+percent2_diff = group2_diff / group2.iloc[-1]['Value']
+percents_diff = [percent1_diff, percent2_diff]
+
+row1 = st.columns(2)
+
+i = 0
+for col in row1:
+    tile = col.container(height=180)
+    ticker = selected_list[i]
+    diff = groups_diff[i]
+    perc = percents_diff[i]
+    i+=1
+    print(ticker, diff)
+    if diff >= 0:
+        title = ":chart_with_upwards_trend:"
+    else:
+        title = ":chart_with_downwards_trend:"
+
+    tile.header(ticker)
+    tile.subheader(f'{title} {int(perc * 100)}% (${abs(diff).round(2)})')
+
+
 hover = alt.selection_single(
     fields=["Timestamp"],
     nearest=True,
