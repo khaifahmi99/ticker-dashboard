@@ -36,37 +36,45 @@ bound_percentage = 0.1
 upper_bound = df['Value'].max() + (df['Value'].max() * bound_percentage)
 lower_bound = df['Value'].min() - (df['Value'].min() * bound_percentage)
 
-selected1 = company_1.split(' ')[0]
-selected2 = company_2.split(' ')[0]
-selected_list = [selected1, selected2]
-group1 = df[df['Company'] == selected1]
-group2 = df[df['Company'] == selected2]
 
-group1_diff = group1.iloc[-1]['Value'] - group1.iloc[0]['Value']
-group2_diff = group2.iloc[-1]['Value'] - group2.iloc[0]['Value']
-groups_diff = [group1_diff, group2_diff]
+selected_companies = company_1.split(' ') + company_2.split(' ')
 
-percent1_diff = group1_diff / group1.iloc[-1]['Value']
-percent2_diff = group2_diff / group2.iloc[-1]['Value']
-percents_diff = [percent1_diff, percent2_diff]
+groups = []
+for company in selected_companies:
+    filtered_df = df[df['Company'] == company]
+    end_value = filtered_df.iloc[-1]['Value']
+    start_value = filtered_df.iloc[0]['Value']
 
-row1 = st.columns(2)
+    diff_absolute = end_value - start_value
+    diff_precentage = diff_absolute / end_value
+    groups.append({
+        'company': company,
+        'diff_absolute': diff_absolute,
+        'diff_percentage': diff_precentage,
+    })
+
+max_col = 3
+n_cols = min(len(groups), 3)
+row1 = st.columns(n_cols)
 
 i = 0
 for col in row1:
-    tile = col.container(height=180)
-    ticker = selected_list[i]
-    diff = groups_diff[i]
-    perc = percents_diff[i]
-    i+=1
-    print(ticker, diff)
-    if diff >= 0:
-        title = ":chart_with_upwards_trend:"
-    else:
-        title = ":chart_with_downwards_trend:"
+    if i <= len(groups) - 1:        
+        tile = col.container(height=180)
+        ticker = groups[i]['company']
+        diff = groups[i]['diff_absolute']
+        perc = groups[i]['diff_percentage']
+        i+=1
+        print(ticker, diff)
+        if diff >= 0:
+            title = ":rocket:"
+            text_color = 'green'
+        else:
+            title = ":small_red_triangle_down:"
+            text_color = 'red'
 
-    tile.header(ticker)
-    tile.subheader(f'{title} {int(perc * 100)}% (${abs(diff).round(2)})')
+        tile.header(ticker)
+        tile.subheader(f':{text_color}[{title} {abs(int(perc * 100))}% (${abs(diff).round(2)})]')
 
 
 hover = alt.selection_single(
