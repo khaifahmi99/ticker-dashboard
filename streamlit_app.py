@@ -7,11 +7,15 @@ import pandas as pd
 st.set_page_config(layout="wide")
 st.title('Compare Shares')
 
+query_params = st.query_params.to_dict()
+company1_param = query_params.get('company1', 'GOOG')
+company2_param = query_params.get('company2', 'AMZN')
+
 with st.sidebar:
     with st.form("shares_form"):
         st.write("Please insert two companies to compare")
-        company_1 = st.text_input('Company 1', 'GOOG')
-        company_2 = st.text_input('Company 2', 'AMZN')
+        company_1 = st.text_input('Company 1', company1_param)
+        company_2 = st.text_input('Company 2', company2_param)
 
         period = st.selectbox(
             'Please select a period',
