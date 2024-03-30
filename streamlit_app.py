@@ -113,3 +113,20 @@ tooltips = (
 cht = (lines + points + tooltips).interactive()
 
 chart = st.altair_chart(cht, use_container_width=True)
+
+# recommendations
+recs = []
+for ticker, data in tickers.tickers.items():
+    recommendations = data.recommendations.iloc[0]
+    recs.append({ 
+        'Company': ticker,
+        'Strong Buy': recommendations['strongBuy'], 
+        'Buy': recommendations['buy'], 
+        'Hold': recommendations['hold'], 
+        'Sell': recommendations['sell'], 
+        'Strong Sell': recommendations['strongSell'] 
+    })
+    
+rec_df = pd.DataFrame(recs)
+st.title("Recommendations")
+st.dataframe(rec_df, use_container_width=True)
