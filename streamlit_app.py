@@ -130,3 +130,35 @@ for ticker, data in tickers.tickers.items():
 rec_df = pd.DataFrame(recs)
 st.title("Recommendations")
 st.dataframe(rec_df, use_container_width=True)
+
+# news
+st.title('News')
+news = []
+for ticker, data in tickers.tickers.items():
+    ticker_news = data.news
+    for n in ticker_news:
+        id = n['uuid']
+        existing_ids = [en['uuid'] for en in news]
+
+        if id not in existing_ids:
+            news.append(n)
+
+news.sort(key=lambda x: x['providerPublishTime'], reverse=True)
+
+row1 = st.columns(2)
+row2 = st.columns(2)
+row3 = st.columns(2)
+rows = [row1, row2, row3]
+
+total_count = 0
+for row in rows:
+    for col in row:
+        tile = col.container(height=180)
+        title = news[total_count]['title']
+        publisher = news[total_count]['publisher']
+        url = news[total_count]['link']
+
+        tile.markdown(f'<h3 style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{title}</h3>', unsafe_allow_html=True)
+        tile.text(publisher)
+        tile.link_button("Read more 🔗", url)
+        total_count+=1
