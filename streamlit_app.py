@@ -14,16 +14,14 @@ company1_param = query_params.get('company1', 'GOOG')
 company2_param = query_params.get('company2', 'AMZN')
 
 with st.sidebar:
+    period = st.selectbox(
+        'Please select a period',
+        ('1Y', '1mo', '3mo', '6mo', 'YTD', '3Y', '5Y'),
+    )
     with st.form("shares_form"):
         st.write("Insert two companies to compare")
         company_1 = st.text_input('Company 1', company1_param)
         company_2 = st.text_input('Company 2', company2_param)
-
-        period = st.selectbox(
-            'Please select a period',
-            ('1Y', '1mo', '3mo', '6mo', 'YTD', '3Y', '5Y'),
-        )
-
         submitted = st.form_submit_button("Compare")
     st.write("Or")
     with st.container(border=True):
