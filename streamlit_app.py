@@ -3,6 +3,7 @@ import yfinance as yf
 import altair as alt
 import pandas as pd
 from data import collections
+from utils import highlight_max_exclude
 
 # config
 st.set_page_config(layout="wide")
@@ -78,7 +79,6 @@ for col in row1:
         diff = groups[i]['diff_absolute']
         perc = groups[i]['diff_percentage']
         i+=1
-        print(ticker, diff)
         if diff >= 0:
             title = ":rocket:"
             text_color = 'green'
@@ -139,7 +139,7 @@ for ticker, data in tickers.tickers.items():
     
 rec_df = pd.DataFrame(recs)
 st.title("Recommendations")
-st.dataframe(rec_df, use_container_width=True)
+st.dataframe(rec_df.style.apply(highlight_max_exclude, axis=1), use_container_width=True)
 
 # news
 st.title('News')
