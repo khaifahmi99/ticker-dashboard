@@ -2,6 +2,7 @@ import streamlit as st
 import yfinance as yf
 import altair as alt
 import pandas as pd
+from data import collections
 
 # config
 st.set_page_config(layout="wide")
@@ -13,7 +14,7 @@ company2_param = query_params.get('company2', 'AMZN')
 
 with st.sidebar:
     with st.form("shares_form"):
-        st.write("Please insert two companies to compare")
+        st.write("Insert two companies to compare")
         company_1 = st.text_input('Company 1', company1_param)
         company_2 = st.text_input('Company 2', company2_param)
 
@@ -23,6 +24,13 @@ with st.sidebar:
         )
 
         submitted = st.form_submit_button("Compare")
+    st.write("Or")
+    with st.container(border=True):
+        st.write("Select a collection")
+        for col in collections:
+            if st.button(col['title']):
+                company_1 = ' '.join(col['companies'][:-1])
+                company_2 = col['companies'][-1]
 
 companies = ' '.join([company_1, company_2])
 tickers = yf.Tickers(companies)
