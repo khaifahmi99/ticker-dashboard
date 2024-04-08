@@ -50,6 +50,7 @@ lower_bound = df['Value'].min() - (df['Value'].min() * bound_percentage)
 
 
 selected_companies = company_1.split(' ') + company_2.split(' ')
+selected_companies = sorted(selected_companies)
 
 groups = []
 for company in selected_companies:
@@ -96,7 +97,8 @@ hover = alt.selection_single(
     empty="none",
 )
 
-lines = alt.Chart(df, title=f'{company_1} vs {company_2} - {period}').mark_line().encode(
+title = ' vs '.join(selected_companies) if len(selected_companies) == 2 else ' | '.join(selected_companies)
+lines = alt.Chart(df, title=f'{title} ({period})').mark_line().encode(
     x = alt.X('yearmonthdate(Timestamp)'),
     y = alt.Y('Value', scale=alt.Scale(domain=[lower_bound, upper_bound])),
     color = 'Company'
