@@ -6,7 +6,11 @@ from data import collections
 from utils import highlight_max_exclude
 
 # config
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_title="Share Analysis",
+    page_icon="📊"
+)
 st.title('Compare Shares')
 
 query_params = st.query_params.to_dict()
