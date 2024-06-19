@@ -7,8 +7,9 @@ import altair as alt
 st.set_page_config(page_title="Watchlist Threshold", page_icon="🚨")
 st.markdown("# Watchlist Threshold")
 
-data = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-us.json").json()
-watchlist = data["watchlist"]
+data_us = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-us.json").json()
+data_au = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-au.json").json()
+watchlist = data_us["watchlist"] + data_au["watchlist"]
 company_list = sorted([w["symbol"] for w in watchlist])
 companies = ' '.join(company_list)
 tickers = yf.Tickers(companies)
