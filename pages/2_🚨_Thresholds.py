@@ -8,12 +8,6 @@ import pymongo
 st.set_page_config(page_title="Watchlist Threshold", page_icon="🚨")
 st.markdown("# Watchlist Threshold")
 
-@st.cache_resource
-def init_connection():
-    return pymongo.MongoClient(**st.secrets["mongo"])
-
-client = init_connection()
-
 data_us = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-us.json").json()
 data_au = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-au.json").json()
 watchlist = data_us["watchlist"] + data_au["watchlist"]
@@ -89,47 +83,31 @@ chart = st.altair_chart(cht, use_container_width=True)
 
 # Recommendation Trends
 st.markdown("# Recommendation Trends")
-@st.cache_data(ttl=14400)
-def get_data(symbol):
-    db = client.personal
-    items = db.Stock.find({ 
-        'symbol': symbol,
-        'strongSell': { '$exists':  True },
-        'sell': { '$exists':  True },
-        'hold': { '$exists':  True },
-        'buy': { '$exists':  True },
-        'strongBuy': { '$exists':  True },
-    }).sort('createdAt', pymongo.DESCENDING)
-    items = list(items)  # make hashable for st.cache_data
-    return items
+rec_t = yf.Ticker(selected_ticker)
+rec = rec_t.recommendations
 
-dates = []
-strong_sell = []
-sell = []
-hold = []
-buy = []
+print(rec)
+
+idx = []
 strong_buy = []
+buy = []
+sell = []
+strong_sell = []
 
-items = get_data(selected_ticker)
-for item in items:
-    dates.append(item['createdAt'])
-    strong_sell.append(item['strongSell'])
-    sell.append(item['sell'])
-    hold.append(item['hold'])
-    buy.append(item['buy'])
-    strong_buy.append(item['strongBuy'])
-    # print(item['sell'], item['strongSell'], item['hold'], item['buy'], item['strongBuy'])
+for i, row in rec.iterrows():
+    idx.append(row['period'])
+    strong_buy.append(row['strongBuy'])
+    buy.append(row['buy'])
+    sell.append(0 - row['sell'])
+    strong_sell.append(0 - row['strongSell'])
 
-rec_df = pd.DataFrame({ 'Dates': dates, '1. Strong Sell': strong_sell, '2. Sell': sell, '3. Hold': hold, '4. Buy': buy, '5. Strong Buy': strong_buy })
-st.line_chart(
-   rec_df, 
-   x="Dates", 
-   y=["2. Sell", "1. Strong Sell", "3. Hold", "4. Buy", "5. Strong Buy"],
-   color=[
-        '#ff0000', 
-        '#ffa500',
-        '#0000ff',
-        '#87CEEB',
-        '#00ff00',
-    ]
+idx.reverse()
+strong_buy.reverse()
+buy.reverse()
+sell.reverse()
+strong_sell.reverse()
+
+rec_df = pd.DataFrame({ 'idx': idx, '1. Strong Buy': strong_buy, '2. Buy': buy, '4. Sell': sell, '5. Strong Sell': strong_sell })
+st.bar_chart(
+   rec_df, x="idx", y=["1. Strong Buy", "2. Buy", '4. Sell', '5. Strong Sell']
 )
