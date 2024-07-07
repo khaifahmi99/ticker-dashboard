@@ -3,9 +3,16 @@ import yfinance as yf
 import pandas as pd
 import requests
 import altair as alt
+import pymongo
 
 st.set_page_config(page_title="Watchlist Threshold", page_icon="🚨")
 st.markdown("# Watchlist Threshold")
+
+@st.cache_resource
+def init_connection():
+    return pymongo.MongoClient(**st.secrets["mongo"])
+
+client = init_connection()
 
 data_us = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-us.json").json()
 data_au = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-au.json").json()
@@ -78,3 +85,51 @@ uppers = [
 
 cht = alt.layer(line, *uppers, *lowers)
 chart = st.altair_chart(cht, use_container_width=True)
+
+
+# Recommendation Trends
+st.markdown("# Recommendation Trends")
+@st.cache_data(ttl=14400)
+def get_data(symbol):
+    db = client.personal
+    items = db.Stock.find({ 
+        'symbol': symbol,
+        'strongSell': { '$exists':  True },
+        'sell': { '$exists':  True },
+        'hold': { '$exists':  True },
+        'buy': { '$exists':  True },
+        'strongBuy': { '$exists':  True },
+    }).sort('createdAt', pymongo.DESCENDING)
+    items = list(items)  # make hashable for st.cache_data
+    return items
+
+dates = []
+strong_sell = []
+sell = []
+hold = []
+buy = []
+strong_buy = []
+
+items = get_data(selected_ticker)
+for item in items:
+    dates.append(item['createdAt'])
+    strong_sell.append(item['strongSell'])
+    sell.append(item['sell'])
+    hold.append(item['hold'])
+    buy.append(item['buy'])
+    strong_buy.append(item['strongBuy'])
+    # print(item['sell'], item['strongSell'], item['hold'], item['buy'], item['strongBuy'])
+
+rec_df = pd.DataFrame({ 'Dates': dates, '1. Strong Sell': strong_sell, '2. Sell': sell, '3. Hold': hold, '4. Buy': buy, '5. Strong Buy': strong_buy })
+st.line_chart(
+   rec_df, 
+   x="Dates", 
+   y=["2. Sell", "1. Strong Sell", "3. Hold", "4. Buy", "5. Strong Buy"],
+   color=[
+        '#ff0000', 
+        '#ffa500',
+        '#0000ff',
+        '#87CEEB',
+        '#00ff00',
+    ]
+)
