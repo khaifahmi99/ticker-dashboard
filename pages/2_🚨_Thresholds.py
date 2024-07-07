@@ -88,26 +88,23 @@ rec = rec_t.recommendations
 
 print(rec)
 
-idx = []
 strong_buy = []
 buy = []
 sell = []
 strong_sell = []
 
 for i, row in rec.iterrows():
-    idx.append(row['period'])
     strong_buy.append(row['strongBuy'])
     buy.append(row['buy'])
     sell.append(0 - row['sell'])
     strong_sell.append(0 - row['strongSell'])
 
-idx.reverse()
 strong_buy.reverse()
 buy.reverse()
 sell.reverse()
 strong_sell.reverse()
 
-rec_df = pd.DataFrame({ 'idx': idx, '1. Strong Buy': strong_buy, '2. Buy': buy, '4. Sell': sell, '5. Strong Sell': strong_sell })
+rec_df = pd.DataFrame({ '1. Strong Buy': strong_buy, '2. Buy': buy, '4. Sell': sell, '5. Strong Sell': strong_sell })
 st.bar_chart(
-   rec_df, x="idx", y=["1. Strong Buy", "2. Buy", '4. Sell', '5. Strong Sell']
+   rec_df, y=["1. Strong Buy", "2. Buy", '4. Sell', '5. Strong Sell']
 )
