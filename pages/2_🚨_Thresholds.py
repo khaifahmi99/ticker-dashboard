@@ -8,6 +8,19 @@ import pymongo
 st.set_page_config(page_title="Watchlist Threshold", page_icon="🚨")
 st.markdown("# Watchlist Threshold")
 
+@st.cache_resource
+def init_connection():
+    return pymongo.MongoClient(**st.secrets["mongo"])
+
+client = init_connection()
+
+@st.cache_data(ttl=14400)
+def get_data(symbol):
+    db = client.personal
+    items = db.Stock.find({ 'symbol': symbol, 'percentageChange': {"$exists": True} }).sort('createdAt', pymongo.DESCENDING).limit(30)
+    items = list(items)
+    return items
+
 data_us = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-us.json").json()
 data_au = requests.get("https://raw.githubusercontent.com/khaifahmi99/stock-alarm/master/watchlist-au.json").json()
 watchlist = data_us["watchlist"] + data_au["watchlist"]
@@ -80,13 +93,39 @@ uppers = [
 cht = alt.layer(line, *uppers, *lowers)
 chart = st.altair_chart(cht, use_container_width=True)
 
+# Percentage Changes
+st.markdown("# Percentage Change")
+percent_changes_data = get_data(selected_ticker)
+change_dates = []
+pos_percent_changes = []
+neg_percent_changes = []
+for d in percent_changes_data:
+    change_dates.append(d['createdAt'].date())
+    if (d['percentageChange'] >= 0):
+        pos_percent_changes.append(round(d['percentageChange'] * 100, 2))
+        neg_percent_changes.append(0)
+    else:
+        neg_percent_changes.append(round(d['percentageChange'] * 100, 2))
+        pos_percent_changes.append(0)        
+
+
+perc_df = pd.DataFrame({ 
+    'Date': change_dates, 
+    'Percent Change (+%)': pos_percent_changes,
+    'Percent Change (-%)': neg_percent_changes,
+})
+st.bar_chart(
+    perc_df, 
+    x='Date', 
+    y=['Percent Change (+%)', 'Percent Change (-%)'],
+    y_label='Percentage Change (%)',
+    color=['#00ff00', '#ff0000',]
+)
 
 # Recommendation Trends
 st.markdown("# Recommendation Trends")
 rec_t = yf.Ticker(selected_ticker)
 rec = rec_t.recommendations
-
-print(rec)
 
 strong_buy = []
 buy = []
