@@ -105,9 +105,8 @@ for d in percent_changes_data:
         pos_percent_changes.append(round(d['percentageChange'] * 100, 2))
         neg_percent_changes.append(0)
     else:
-        neg_percent_changes.append(round(d['percentageChange'] * 100, 2))
-        pos_percent_changes.append(0)        
-
+        neg_percent_changes.append(abs(round(d['percentageChange'] * 100, 2)))
+        pos_percent_changes.append(0)
 
 perc_df = pd.DataFrame({ 
     'Date': change_dates, 
